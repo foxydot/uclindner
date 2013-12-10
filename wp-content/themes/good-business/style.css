@@ -1,0 +1,23 @@
+/*
+    Theme Name: Good Business
+	Theme URI: http://msdlab.com/
+	Description: Custom theme.
+    Author: Mad Science Dept./Reversed Out
+    Author URI: http://msdlab.com/
+ 
+    Version: 1.2
+  
+    Template: twentytwelve
+    Template Version: 1.2
+ 
+	License: GNU General Public License v2.0 (or later)
+	License URI: http://www.opensource.org/licenses/gpl-license.php
+*/
+
+
+/* 
+*
+* This theme uses LESS. The actual files are found in ./lib/less and are output to ./lib/css. 
+* The files are enqueued via functions.php
+*
+*/
