@@ -1,0 +1,15 @@
+
+$(document).ready(function(){
+	
+	if($(".enqDropIn").length > 0)
+	  { 
+	   $('.enqDropIn').customSelect();
+	  }
+	  
+	if($("#mainSlider").length){
+		$('#mainSlider').flexslider({
+			animation: "slide",
+			 slideshow: true
+		});
+	}
+});

@@ -1,0 +1,78 @@
+<footer>
+	<section class="inner">
+    	<div class="footerCol">
+        	<?php 
+				$firstcol_pageid = 102;
+				$firstcol_page_data = get_page ( $firstcol_pageid );
+				// echo "<pre>"; print_r($page_data);
+			?>
+            <div class="title"><?php echo $firstcol_page_data->post_title; ?></div>
+            <p><?php echo apply_filters( 'the_content', $firstcol_page_data->post_content );  ?></p>
+            <span>- <?php echo get_field('person_name',$firstcol_pageid)?><br>
+                <small><?php echo get_field('person_designation',$firstcol_pageid)?></small>
+            </span>
+            
+        <!-- /footerCol --></div>
+        
+        <div class="footerCol gap">
+            <div class="title">General</div>
+            <ul>
+            	<?php wp_nav_menu( array('menu' => 'general_nav' , 'items_wrap' => '%3$s')); ?>
+            </ul>
+            
+            <div class="title mrgTop">Programs</div>
+            <ul>
+            	<?php wp_nav_menu( array('menu' => 'programs_nav' , 'items_wrap' => '%3$s')); ?>
+            </ul>
+        <!-- /footerCol --></div>
+        <div class="lastCol">
+        	<form>
+            	<fieldset>
+                	<label>Perspective Newsletter</label>
+                    <div class="txtField">
+                    	<input type="text" name="" placeholder="e-mail">
+                        <button>GO</button>
+                    </div>
+                </fieldset>
+                <fieldset>
+                	<label>LSAT LISTSERV</label>
+                    <div class="txtField">
+                    	<input type="text" name="" placeholder="e-mail">
+                        <button>GO</button>
+                    </div>
+                </fieldset>
+            </form>
+            <div class="title">Connect With Us</div>
+            <div class="socialLinks">
+            	<ul>
+                	<li class="linkedin"><a href="javascript:void(0);" title="Linkedin">Linkedin</a></li>
+                    <li class="twitter"><a href="javascript:void(0);" title="Twitter">Twitter</a></li>
+                    <li class="facebook"><a href="javascript:void(0);" title="Facebook">Facebook</a></li>
+                    <li class="rss"><a href="javascript:void(0);" title="RSS">RSS</a></li>
+                </ul>
+            </div>
+        <!-- /lastCol --></div>
+        
+    <!-- /inner --></section>
+    
+	<div class="innerFooter">
+        <section class="inner">
+            <ul>
+            	<li>COPYRIGHT &copy;2013 WEAVES COMMERCE PVT LTD</li>
+                <li><a href="javascript:void(0);" title="PRIVACY POLICY">PRIVACY POLICY</a></li>
+                <li><a href="javascript:void(0);" title="TERMS OF USE">TERMS OF USE</a></li>
+            </ul>
+            <p>The views and opinions expressed within this web site are strictly those of the page authors. The contents of this page and its subpages have not been reviewed or approved by the University of Cincinnati and the University accepts no responsibility for any of its content.  Comments regarding the site should be sent to the pages' authors.</p>
+        <!-- /inner --></section>
+    </div>
+</footer>
+
+<?php wp_footer(); ?>
+
+<script type="text/javascript" src="<?php bloginfo('template_url'); ?>/js/jquery.min.js"></script> 
+<script type="text/javascript" src="<?php bloginfo('template_url'); ?>/js/jquery.ticker.js"></script> 
+<script type="text/javascript" src="<?php bloginfo('template_url'); ?>/js/site.js"></script> 
+<script src="<?php bloginfo('template_url'); ?>/js/jquery.flexslider.js"></script>
+<script src="<?php bloginfo('template_url'); ?>/js/function.js"></script>
+</body>
+</html>

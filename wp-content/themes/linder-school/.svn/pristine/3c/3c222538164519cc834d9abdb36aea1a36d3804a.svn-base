@@ -1,0 +1,32 @@
+<?php
+/**
+ * The Template for displaying all single posts.
+ *
+ * @package WordPress
+ * @subpackage Twenty_Twelve
+ * @since Twenty Twelve 1.0
+ */
+
+get_header(); ?>
+
+<div class="innerContainer">
+	<section class="inner">
+		<article>
+        	<div class="articleTitle"><h2><?php the_title(); ?></h2></div>
+        	<?php while ( have_posts() ) : the_post(); ?>
+            
+			<section class="blogOutr">
+            	
+				<p><?php the_content(); ?></p>
+                
+            </section>
+            <?php endwhile; // end of the loop. ?>
+		</article>
+        <aside>
+		<?php get_sidebar(); ?>
+        </aside>
+	</section>	
+</div>
+	
+
+<?php get_footer(); ?>

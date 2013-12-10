@@ -1,0 +1,25 @@
+<?php
+/**
+ * The sidebar containing the main widget area.
+ *
+ * If no active widgets in sidebar, let's hide it completely.
+ *
+ * @package WordPress
+ * @subpackage Twenty_Twelve
+ * @since Twenty Twelve 1.0
+ */
+?>
+
+<aside>
+<?php 
+	$organizational_list_page_id  = 327;
+	$list_data = get_page ( $organizational_list_page_id );
+?>
+ 
+				 
+              
+    <h3><?php echo $list_data->post_title; ?></h3>
+	<?php
+		echo apply_filters( 'the_content', $list_data->post_content ); 
+	?>
+<!-- /aside --></aside>
