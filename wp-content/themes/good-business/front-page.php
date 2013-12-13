@@ -20,11 +20,11 @@ get_header(); ?>
                 //print "<pre>";
                 //print_r($postcontent);
 
-            $img = wp_get_attachment_url(  get_post_thumbnail_id( $postcontent->ID ) ); 
+            $img = wp_get_attachment_image_src( get_post_thumbnail_id( $postcontent->ID ), 'homepage-slider' );
             ?>
                 <li>
                     <div class="lftArea">
-                        <img src="<?php echo $img; ?>" width="640" height="456" alt="banner">
+                        <img src="<?php echo $img[0]; ?>" alt="banner">
                         <div class="transOutr">
                         <h2><?php echo $postcontent->post_title; ?></h2>
                           <?php echo substr($postcontent->post_content,0,200).'...'; ?>
@@ -42,41 +42,7 @@ get_header(); ?>
       
       <div class="rgtArea">
       
-    <?php 
-    $args=array('post_type'=>'tribe_events','orderby' => 'post_date','order' => 'DESC');
-    
-    $array_content = get_posts($args);
-    foreach($array_content as $eventpost){
-        $Epost_name = $eventpost->post_name;
-        $EeventID = $eventpost->ID;
-        $Epost_title = $eventpost->post_title;
-        $Epost_content = $eventpost->post_content;
-    }
-    //print $post_name;
-    //global $wpdb;
-    //echo $wpdb->last_query;
-    //print "<pre>";
-    //print_r($array_content);
-    $author = get_the_author();
-    ?> 
-            <section class="upcomingEvent" >
-                <?php $elink = 'http://rou-lindner-school.landingpages.tv/calendar/'.$Epost_name; ?>
-                <a href="<?php print $elink;?>">
-                <div style="float: left; overflow: hidden;     width: 290px; height:141px;">
-                    <!--
-                <img src="<?php bloginfo('template_url'); ?>/images/upcoming_event.jpg" width="291" height="141" alt="upcoming event">
-                -->
-                <?php echo get_the_post_thumbnail( $EeventID ); ?>  
-                    <span>upcoming event</span>
-                </div>
-                <div class="upcomingDetails" style="height:112px !important;">
-                    <h3><?php print $Epost_title;?></h3>
-                  <p><?php print substr($Epost_content,0,85).'..';?></p>
-                  <a href="<?php print $elink;?>" title="Signup Now">Signup Now</a>
-                  <a href="/events/" title="See All Events">See All Events</a>
-                </div>
-                </a>
-             </section>
+    <?php print MSDLAB::recent_events_hp_widget(); ?>
              
              <?php
                  $args1 = array(
@@ -89,7 +55,7 @@ get_header(); ?>
              ?>
              
              
-             <?php $elink1 = 'http://rou-lindner-school.landingpages.tv/'.$array_content2[0]->post_name; ?>
+             <?php $elink1 = '/'.$array_content2[0]->post_name; ?>
              <a href="<?php print $elink1;?>">
              <section class="colum2">
              <!--
@@ -109,15 +75,14 @@ get_header(); ?>
       
     <!-- /inner --></section>
 <!-- /bannerOutr --></section>
-
+<?php
+    $args = array('category_name'=>'announcements','order'=> 'DESC');
+    $posts_new_stripes=get_posts($args);
+?>
 <div class="latestNews">
     <section class="inner">
          <ul id="js-news" class="js-hidden">
            <?php 
-            $category_id = get_cat_ID('announcements'); 
-            $args_new=array('category'=>$category_id,'order'=> 'DESC');
-            $posts_new_stripes=get_posts($args_new);
-            
             foreach ($posts_new_stripes  as $posts_new_stripes_content){    
             ?>   
             <li class="news-item"><?php echo $posts_new_stripes_content->post_content; ?></li>
