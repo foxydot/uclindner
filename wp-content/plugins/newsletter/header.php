@@ -11,7 +11,9 @@ if (isset($_REQUEST['dismiss']) && check_admin_referer()) {
 <div id="newsletter-header">
     <a href="http://www.satollo.net/plugins/newsletter/newsletter-documentation" target="_blank">Documentation</a>
     <a href="http://www.satollo.net/forums" target="_blank">Forum</a>
+    <?php if (!$header_is_extension) { ?>
     <a href="http://www.satollo.net/plugins/newsletter" target="_blank">Extend it now!</a>
+    <?php } ?>
     <!--<a href="http://www.satollo.net/plugins/newsletter/newsletter-collaboration" target="_blank">Collaboration</a>-->
 
     <form style="display: inline; margin: 0;" action="http://www.satollo.net/wp-content/plugins/newsletter/do/subscribe.php" method="post" target="_blank">
@@ -21,15 +23,17 @@ if (isset($_REQUEST['dismiss']) && check_admin_referer()) {
 
     <a href="https://www.facebook.com/satollo.net" target="_blank"><img style="vertical-align: bottom" src="<?php echo plugins_url('newsletter'); ?>/images/facebook.png"></a>
 
+    <?php if (!$header_is_extension) { ?>
     <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5Y6JXSA7BSU2L" target="_blank"><img style="vertical-align: bottom" src="<?php echo plugins_url('newsletter'); ?>/images/donate.png"></a>
-    <a href="http://www.satollo.net/donations" target="_blank">Even <b>1$</b> helps: why?</a>
+    <a href="http://www.satollo.net/donations" target="_blank">Even <b>2$</b> help: why?</a>
+    <?php } ?>
     <!--
     <a href="http://www.satollo.net/plugins/newsletter/newsletter-delivery-engine" target="_blank">Engine next run in <?php echo wp_next_scheduled('newsletter') - time(); ?> s</a>
     -->
 </div>
 <?php } ?>
 
-<?php if ($dismissed['rate'] != 1) { ?>
+<?php if (isset($dismissed['rate']) && $dismissed['rate'] != 1) { ?>
 <div class="newsletter-notice">
     I never asked before and I'm curious: <a href="http://wordpress.org/extend/plugins/newsletter/" target="_blank">would you rate this plugin</a>?
     (few seconds required). (account on WordPress.org required, every blog owner should have one...). <strong>Really appreciated, Stefano</strong>.
@@ -38,7 +42,7 @@ if (isset($_REQUEST['dismiss']) && check_admin_referer()) {
 </div>
 <?php } ?>
 
-<?php if ($dismissed['newsletter-page'] != 1 && empty(NewsletterSubscription::instance()->options['url'])) { ?>
+<?php if (isset($dismissed['newsletter-page']) && $dismissed['newsletter-page'] != 1 && empty(NewsletterSubscription::instance()->options['url'])) { ?>
 <div class="newsletter-notice">
     Create a page with your blog style to show the subscription form and the subscription messages. Go to the
     <a href="?page=newsletter_subscription_options">subscription panel</a> to

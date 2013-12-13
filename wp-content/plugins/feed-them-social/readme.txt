@@ -1,9 +1,9 @@
 === Feed Them Social ===
 Contributors: slickremix
-Tags:  social, social plugin, pinterest, pinterest boards, pinterest feeds, pinterest photos, pinterest widget, pinterest widgets, facebook, facebook plugin, facebook group, facebook groups, facebook page, facebook pages, twitter, twitter plugin, instagram, instagram plugin, feed me social, feed, feeds, shortcode, slickremix, plugin, pages, posts, images, page, post, image, youtube, youtube feed, youtube channel, youtube video, youtube videos, videos, youtube embed, embed, video iframe, admin, comments, Posts, widgets
+Tags:  social, social plugin, social networking, networking, pinterest, pinterest boards, pinterest feeds, pinterest photos, pinterest widget, pinterest widgets, facebook, facebook plugin, facebook group, facebook groups, facebook page, facebook pages, twitter, twitter plugin, instagram, instagram plugin, feed me social, feed, feeds, shortcode, slickremix, plugin, pages, posts, images, page, post, image, youtube, youtube feed, youtube channel, youtube video, youtube videos, videos, youtube embed, embed, video iframe, admin, comments, Posts, widgets
 Requires at least: 3.4.0
-Tested up to: 3.6
-Stable tag: 1.2.9
+Tested up to: 3.7.1
+Stable tag: 1.3.3
 License: GPLv2 or later
 
 
@@ -13,13 +13,13 @@ Easily add Instagram, Facebook Group, Facebook Page, Twitter, YouTube and now Pi
 
 With our plugin you can create social feeds of any or all your celebrities, family, friends, yourself, or businesses. Looks great on Desktops, Tablets, and Mobile Devices.
 
-If you enjoy using this plugin please take a second to tell others! [Click here to share.](http://www.facebook.com/sharer.php?u=http://wordpress.org/plugins/feed-them-social/&t=FeedThemSocial)
+If you enjoy using our plugin please tell others. [Click here to share.](http://www.facebook.com/sharer.php?u=http://wordpress.org/plugins/feed-them-social/&t=FeedThemSocial)
 
 = Features include the following: =
-  * Add as many social feeds as you want!
+  * Add as many social feeds as you need!
   * Display social feeds on any post, page, or sidebar!
   * Easily generate all the shortcodes you need for any feed with our SUPER SIMPLE shortcode generator!
-  * Responsive social feeds!
+  * Responsive social Feeds!
   * With our [Premium Extension](http://www.slickremix.com/product/feed-them-social-premium-extension/) you can set how many posts, pictures, tweets, or videos for each individual social feed! We now have simple widgets available for all the feeds. This premium edition also allows our basic shortcode to work with text widgets. Facebook Groups now has the option to hide the Title or Description too! [See Example Demo](http://feedthemsocial.com/)
 
 = Example Widget Feed Demo =
@@ -43,7 +43,7 @@ If you enjoy using this plugin please take a second to tell others! [Click here 
   
 More Social Feeds coming soon like Facebook Pages and Vimeo. [Suggest another Feed](http://www.slickremix.com/support-forum).
   
-**NOTE:** FTS Premium Plugin users receive FREE updates of our Premium plugin. 
+**SPECIAL NOTE:** FTS Premium Plugin users receive unlimited FREE updates of our Premium plugin, no monthly or anual fees here! 
   
 **DISCLAIMER:** SlickRemix **DOES NOT** code for IE. If it works awesome, if not we highly suggest one of the following modern browsers: [Google Chrome](https://www.google.com/intl/en/chrome/browser/), [Safari](http://www.apple.com/safari/) or [Firefox](http://www.mozilla.org/en-US/firefox/).
 
@@ -56,6 +56,19 @@ More Social Feeds coming soon like Facebook Pages and Vimeo. [Suggest another Fe
   * Extract the zip file and drop the contents in the wp-content/plugins/ directory of your WordPress installation and then activate the Plugin from Plugins page. 
 
 == Changelog ==
+= Version 1.3.2 Wednesday, November 13th, 2013 =
+ * Fix: Issue with Clear Cache button not appearing on settings page.
+
+= Version 1.3.1 Wednesday, November 13th, 2013 =
+ * Added: Clear All FTS Feeds Cache button to Settings Page. (This helps when you are generating shortcodes with NEW options!)
+ 
+= Version 1.3.0 Wednesday, October 16th, 2013 =
+ * Fixed: Facebook feeds to show proper comment count on each post.
+ * Added: Facebook feeds now caches for 15 minutes. Dramatically increases load time.
+ * Fixed: Pintrest feed to not conflict with NextGen Gallery plugin.
+ * Fixed: Cleaned up some admin styling.
+ * Added: Twitter feed now shows links for https, @twittername and #twittertags. Thanks to Cricket Wilson-Harris for the lead on this one.
+
 = Version 1.2.9 Monday, September 9th, 2013 =
  * NEW FEED: Facebook PAGES have been added to the list of awesome feeds you can now display on your site!
  * Updated: Facebook groups feed code to have less code.
@@ -148,7 +161,7 @@ Yes. Currently we have [1 Premium Extension](http://www.slickremix.com/product/f
 == Screenshots ==
 
 1. This is the settings area for the Feed Them Social. Generate shortcodes in seconds!
-2. Facebook Group Shortcode Generator! Just add your Group ID and with the [Premium Extension](http://www.slickremix.com/product/feed-them-social-premium-extension/) change the number of Posts beyond 5.
+2. Facebook Page Shortcode Generator (The group shortcode generator looks the same)! Just add your Page ID and with the [Premium Extension](http://www.slickremix.com/product/feed-them-social-premium-extension/) change the number of Posts beyond 5.
 3. Example "Facebook Group" feed. Show up to 24 Posts per feed!
 4. Twitter Shortcode Generator! Just add your Twitter name and with the [Premium Extension](http://www.slickremix.com/product/feed-them-social-premium-extension/) change the number of Tweets Posts beyond 5.
 5. Example "Twitter" feed. Show up to 20 Tweets per feed!

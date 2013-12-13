@@ -80,11 +80,11 @@ class NewsletterModule {
     function upgrade() {
         $this->logger->info('upgrade> Start');
 
+        $default_options = $this->get_default_options();
         if (empty($this->options) || !is_array($this->options)) {
-            $this->options = $this->get_default_options();
-            $this->save_options($this->options);
+            $this->save_options($default_options);
         } else {
-            // TODO: Try with an array_merge()?
+            $this->save_options(array_merge($default_options, $this->options));
         }
 //        if (!empty($this->module_id)) {
 //            wp_clear_scheduled_hook($this->prefix . '_version_check');
@@ -96,10 +96,12 @@ class NewsletterModule {
         global $wpdb, $charset_collate;
 
         $this->logger->info('upgrade_query> Executing ' . $query);
+        $suppress_errors = $wpdb->suppress_errors(true);
         $wpdb->query($query);
         if ($wpdb->last_error) {
             $this->logger->debug($wpdb->last_error);
         }
+        $wpdb->suppress_errors($suppress_errors);
     }
 
 //    function hook_version_check() {
@@ -163,7 +165,7 @@ class NewsletterModule {
         @include WP_CONTENT_DIR . '/extensions/newsletter/' . $this->module . '/languages/' . $sub . 'en_US.php';
         @include NEWSLETTER_DIR . '/' . $this->module . '/languages/' . $sub . WPLANG . '.php';
         @include WP_CONTENT_DIR . '/extensions/newsletter/' . $this->module . '/languages/' . $sub . WPLANG . '.php';
-        if (!is_array($options)) {
+        if (!isset($options) || !is_array($options)) {
             return array();
         }
         return $options;
@@ -608,10 +610,12 @@ class NewsletterModule {
             $user = (array) $user;
         if (empty($user['id'])) {
             $existing = $this->get_user($user['email']);
-            if ($existing != null)
+            if ($existing != null) {
                 return false;
-            if (empty($user['token']))
+            }
+            if (empty($user['token'])) {
                 $user['token'] = NewsletterModule::get_token();
+            }
             //if (empty($user['created'])) $user['created'] = time();
             // Database default
             //if (empty($user['status'])) $user['status'] = 'S';

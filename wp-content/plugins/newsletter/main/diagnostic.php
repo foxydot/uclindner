@@ -37,6 +37,9 @@ if ($controls->is_action('upgrade')) {
     NewsletterSubscription::instance()->upgrade();
     NewsletterEmails::instance()->upgrade();
     NewsletterStatistics::instance()->upgrade();
+    if (class_exists('NewsletterFollowup')) {
+        NewsletterFollowup::instance()->upgrade();
+    }
     $controls->messages = 'Upgrade forced!';
 }
 
@@ -60,7 +63,7 @@ if ($controls->is_action('test_wp')) {
     if ($r) {
         $controls->messages .= 'Direct WordPress email sent<br />';
     } else {
-        $controls->errors .= 'Direct WordPress email NOT sent: ask your provider if your web space is enabled to send emails.<br />';
+        $controls->errors .= 'Direct WordPress email NOT sent: <strong>ask now your provider</strong> to know if you can send emails from your blog or not..<br>';
     }
 }
 
@@ -107,7 +110,7 @@ if (empty($controls->data)) $controls->data = get_option('newsletter_diagnostic'
     <div class="preamble">
     <p>
         If something is not working, here are some test procedures and diagnostics. But before you try these,
-        write down any modifications or configuration changes that you may have made.
+        write down any configuration changes that you may have made.
         For example: Did you use sender email or name? What was the return path? What was the reply to?
     </p>
     </div>
@@ -374,6 +377,12 @@ if (empty($controls->data)) $controls->data = get_option('newsletter_diagnostic'
                             <td>WordPress Memory limit</td>
                             <td>
                                 <?php echo WP_MEMORY_LIMIT; ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>WP_DEBUG</td>
+                            <td>
+                                <?php echo WP_DEBUG?'true':'false'; ?>
                             </td>
                         </tr>
                         <tr>

@@ -1,8 +1,8 @@
 === Newsletter ===
 Tags: newsletter,email,subscription,mass mail,list build,email marketing,direct mailing
 Requires at least: 3.3.0
-Tested up to: 3.5.2
-Stable tag: 3.3.7
+Tested up to: 3.7.1
+Stable tag: trunk
 Donate link: http://www.satollo.net/donations
 
 Add a real newsletter to your blog. In seconds. For free. With unlimited emails and subscribers.
@@ -12,6 +12,8 @@ Add a real newsletter to your blog. In seconds. For free. With unlimited emails 
 This plug-in adds a real newsletter system to your WordPress blog. Perfect for list building, 
 you can create cool emails with visual editor, send and
 track them.
+
+** Let me know if the plugin is doing well: rate it, thank you!** (see the stars on the right)
 
 Unlimited subscribers, unlimited e-mails.
 
@@ -54,6 +56,70 @@ Thank you, Stefano Lissa (Satollo).
 No screen shots are available at this time.
 
 == Changelog ==
+
+= 3.4.8 =
+
+* Added a javascript protection against auto confirmation from bot
+* Fixed a warning with debug active on site login
+
+= 3.4.7 =
+
+* Fixed the subscription panel where some panels where no more visible.
+
+= 3.4.6 =
+
+* Added the full_name tag
+* Added the "simple" theme
+* Added indexes to the statistic table to improve the reports extension response time
+* Fixed some noticies in debug mode
+
+= 3.4.5 =
+
+* Revisited the theme chooser and the theme configuration
+* Fixed a double field on the locked content configuration
+* Improved the delivery engine
+
+= 3.4.4 =
+
+* Improved error messages
+* Fixed the last tab store (jquery changes)
+* Added some new controls for the pop up extensions
+
+= 3.4.3 =
+
+* Added the precendence bulk header (https://support.google.com/mail/answer/81126)
+* Added filter on messages to avoid wrong URLs when the blog change domain or folder
+* Added the alt attribute to the tracking image
+* New option to set the PHP max execution time
+* Fixed some text on main configuration panel
+
+= 3.4.2 =
+
+* Refined the subscription for already subscribed emails
+
+= 3.4.1 =
+
+* Fixed the delivery engine warning message
+* Fixed the version check
+
+= 3.4.0 =
+
+* Changed newsletter copy to copy even the editor and traking status
+* Fixed the subscribers search list
+* Added some more buttons on Newsletter editor
+* Added the subscription form menu voice (I cannot answer anymore the same request about subscribe button translation :-)
+* Suppressed warning on log function
+
+= 3.3.9 =
+
+* Fixed activation in debug mode
+* Fixed some notices
+* Added defaults for subscriber titles (Mr, Mrs, ...)
+
+= 3.3.8 =
+
+* Internal code fixes
+* Fixed the "editor" access control
 
 = 3.3.7 =
 

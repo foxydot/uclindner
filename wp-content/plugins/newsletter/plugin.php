@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: http://www.satollo.net/plugins/newsletter
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="http://www.satollo.net/plugins/newsletter#update">this page</a> to know what's changed.</strong>
-  Version: 3.3.7
+  Version: 3.4.8
   Author: Stefano Lissa
   Author URI: http://www.satollo.net
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -13,7 +13,7 @@
  */
 
 // Useed as dummy parameter on css and js links
-define('NEWSLETTER_VERSION', '3.3.7');
+define('NEWSLETTER_VERSION', '3.4.8');
 
 global $wpdb, $newsletter;
 
@@ -49,11 +49,12 @@ define('NEWSLETTER_UNLOCK_URL', NEWSLETTER_URL . '/do/unlock.php');
 define('NEWSLETTER_UNSUBSCRIBE_URL', NEWSLETTER_URL . '/do/unsubscribe.php');
 define('NEWSLETTER_UNSUBSCRIPTION_URL', NEWSLETTER_URL . '/do/unsubscription.php');
 
-
 if (!defined('NEWSLETTER_LIST_MAX'))
     define('NEWSLETTER_LIST_MAX', 20);
+
 if (!defined('NEWSLETTER_PROFILE_MAX'))
     define('NEWSLETTER_PROFILE_MAX', 20);
+
 if (!defined('NEWSLETTER_FORMS_MAX'))
     define('NEWSLETTER_FORMS_MAX', 10);
 
@@ -74,6 +75,7 @@ require_once NEWSLETTER_INCLUDES_DIR . '/themes.php';
 class Newsletter extends NewsletterModule {
 
     // Limits to respect to avoid memory, time or provider limits
+    var $time_start;
     var $time_limit;
     var $email_limit = 10; // Per run, every 5 minutes
     var $limits_set = false;
@@ -107,25 +109,15 @@ class Newsletter extends NewsletterModule {
     }
 
     function __construct() {
-        // Early possible
-        if (defined('NEWSLETTER_MAX_EXECUTION_TIME')) {
-            $max_time = NEWSLETTER_MAX_EXECUTION_TIME * 0.9;
-            @set_time_limit(NEWSLETTER_MAX_EXECUTION_TIME);
-        } else {
-            $max_time = (int) (@ini_get('max_execution_time') * 0.9);
-        }
 
-        if ($max_time == 0) {
-            $max_time = 60;
-        }
-
-        $this->time_limit = time() + $max_time;
-
+       
+        $this->time_start = time();
+        
         // Here because the upgrade is called by the parent constructor and uses the scheduler
         add_filter('cron_schedules', array($this, 'hook_cron_schedules'), 1000);
 
-        parent::__construct('main', '1.1.8');
-
+        parent::__construct('main', '1.2.1');
+ 
         $max = $this->options['scheduler_max'];
         if (!is_numeric($max))
             $max = 100;
@@ -156,6 +148,11 @@ class Newsletter extends NewsletterModule {
 
         if (is_admin()) {
             add_action('admin_head', array($this, 'hook_admin_head'));
+            
+            // Protection against strange schedule removal on some installations
+            if (!wp_next_scheduled('newsletter') && !defined('WP_INSTALLING')) {
+                wp_schedule_event(time() + 30, 'newsletter', 'newsletter');
+            }
         }
     }
 
@@ -164,8 +161,7 @@ class Newsletter extends NewsletterModule {
         // the every-five-minutes schedule named "newsletter" is not present.
         // Since the activation does not forces an upgrade, that schedule must be reactivated here. It is activated on
         // the upgrade method as well for the user which upgrade the plugin without deactivte it (many).
-        $time = wp_next_scheduled('newsletter');
-        if ($time === false) {
+        if (!wp_next_scheduled('newsletter')) {
             wp_schedule_event(time() + 30, 'newsletter', 'newsletter');
         }
     }
@@ -202,11 +198,6 @@ class Newsletter extends NewsletterModule {
         $this->upgrade_query("drop table if exists " . $wpdb->prefix . "newsletter_work");
         $this->upgrade_query("alter table " . NEWSLETTER_EMAILS_TABLE . " convert to character set utf8");
 
-        // TODO: To be moved on users module.
-        $this->upgrade_query("alter table " . NEWSLETTER_USERS_TABLE . " convert to character set utf8");
-
-        $this->upgrade_query("update " . NEWSLETTER_USERS_TABLE . " set sex='n' where sex='' or sex=' '");
-
         // Some setting check to avoid the common support request for mis-configurations
         $options = $this->get_options();
 
@@ -240,17 +231,24 @@ class Newsletter extends NewsletterModule {
 
         wp_clear_scheduled_hook('newsletter_update');
         wp_clear_scheduled_hook('newsletter_check_versions');
-        wp_schedule_event(time() + 30, 'weekly', 'newsletter_check_versions');
+        wp_schedule_event(time() + 30, 'newsletter_weekly', 'newsletter_check_versions');
 
         wp_mkdir_p(WP_CONTENT_DIR . '/extensions/newsletter');
         wp_mkdir_p(WP_CONTENT_DIR . '/cache/newsletter');
+        
+        //wp_clear_scheduled_hook('newsletter_updates_run');
+        wp_clear_scheduled_hook('newsletter_statistics_version_check');
+        wp_clear_scheduled_hook('newsletter_reports_version_check');
+        wp_clear_scheduled_hook('newsletter_feed_version_check');
+        wp_clear_scheduled_hook('newsletter_popup_version_check');
+        
 
         return true;
     }
 
     function admin_menu() {
         // This adds the main menu page
-        add_menu_page('Newsletter', 'Newsletter', ($newsletter->options['editor'] == 1) ? 'manage_categories' : 'manage_options', 'newsletter_main_index');
+        add_menu_page('Newsletter', 'Newsletter', ($this->options['editor'] == 1) ? 'manage_categories' : 'manage_options', 'newsletter_main_index');
 
         $this->add_menu_page('index', 'Welcome');
         $this->add_menu_page('main', 'Configuration');
@@ -265,7 +263,7 @@ class Newsletter extends NewsletterModule {
         $warnings = '';
         $x = wp_next_scheduled('newsletter');
         if ($x === false) {
-            $warnings .= 'The delivery engine is off (it should never be off). See the System Check below to reactivate it.<br>';
+            $warnings .= 'The delivery engine is off (it should never be off). Deactivate and reactivate the plugin. Thank you.<br>';
         } else if (time() - $x > 900) {
             $warnings .= 'The cron system seems not running correctly. See <a href="http://www.satollo.net/how-to-make-the-wordpress-cron-work" target="_blank">this page</a> for more information.<br>';
         }
@@ -342,10 +340,10 @@ class Newsletter extends NewsletterModule {
 
         // TODO: move on subscription module
         $profile_options = get_option('newsletter_profile');
-        if ($profile_options['style'] != '') {
+        if (!empty($profile_options['style'])) {
             echo '<link href="' . NewsletterSubscription::instance()->get_style_url($profile_options['style']) . '" type="text/css" rel="stylesheet">';
         }
-        if ($profile_options['widget_style'] != '') {
+        if (!empty($profile_options['widget_style'])) {
             echo '<link href="' . NewsletterSubscription::instance()->get_style_url($profile_options['widget_style']) . '" type="text/css" rel="stylesheet">';
         }
     }
@@ -374,7 +372,7 @@ class Newsletter extends NewsletterModule {
     function hook_newsletter() {
         global $wpdb;
 
-        $this->logger->debug('hook_newsletter> Starting');
+        $this->logger->debug('hook_newsletter> Start');
 
         // Do not accept job activation before at least 4 minutes are elapsed from the last run.
         if (!$this->check_transient('engine', NEWSLETTER_CRON_INTERVAL))
@@ -390,6 +388,8 @@ class Newsletter extends NewsletterModule {
         }
         // Remove the semaphore so the delivery engine can be activated again
         $this->delete_transient('engine');
+        
+        $this->logger->debug('hook_newsletter> End');
     }
 
     /**
@@ -438,6 +438,7 @@ class Newsletter extends NewsletterModule {
                 return false;
 
             $headers = array('List-Unsubscribe' => '<' . NEWSLETTER_UNSUBSCRIBE_URL . '?nk=' . $user->id . '-' . $user->token . '>');
+            $headers['Precedence'] = 'bulk';
 
             if (!$test) {
                 $wpdb->query("update " . NEWSLETTER_EMAILS_TABLE . " set sent=sent+1, last_id=" . $user->id . " where id=" . $email->id . " limit 1");
@@ -484,6 +485,7 @@ class Newsletter extends NewsletterModule {
 
         return ob_get_clean();
     }
+    
 
     /**
      * This function checks is, during processing, we are getting to near to system limits and should stop any further
@@ -494,6 +496,24 @@ class Newsletter extends NewsletterModule {
 
         if (!$this->limits_set) {
             $this->logger->debug('limits_exceeded> Setting the limits for the first time');
+            
+            $max_time = NEWSLETTER_CRON_INTERVAL;
+                    
+            // Actually it should be set on startup, anyway the scripts use as time base the startup time
+            if (!empty($this->options['php_time_limit'])) {
+                @set_time_limit((int)$this->options['php_time_limit']);
+            }   
+            else if (defined('NEWSLETTER_MAX_EXECUTION_TIME')) {
+                @set_time_limit(NEWSLETTER_MAX_EXECUTION_TIME);
+            } 
+            
+            $max_time = (int) (@ini_get('max_execution_time') * 0.95);
+            if ($max_time == 0 || $max_time > NEWSLETTER_CRON_INTERVAL) $max_time = (int)(NEWSLETTER_CRON_INTERVAL*0.95);
+ 
+            $this->time_limit = $this->time_start + $max_time;
+            
+            $this->logger->info('limits_exceeded> Max time set to ' . $max_time);
+ 
             $max = $this->options['scheduler_max'];
             if (!is_numeric($max))
                 $max = 100;
@@ -645,6 +665,10 @@ class Newsletter extends NewsletterModule {
         $schedules['newsletter'] = array(
             'interval' => NEWSLETTER_CRON_INTERVAL, // seconds
             'display' => 'Newsletter'
+        );
+        $schedules['newsletter_weekly'] = array(
+            'interval' => 86400*7, // seconds
+            'display' => 'Newsletter Weekly'
         );
         return $schedules;
     }
@@ -801,6 +825,16 @@ class Newsletter extends NewsletterModule {
 
 
             $text = str_replace('{surname}', $user->surname, $text);
+            $text = str_replace('{last_name}', $user->surname, $text);
+            
+            $full_name = trim($user->name . ' ' . $user->surname);
+            if (empty($full_name)) {
+                $text = str_replace(' {full_name}', '', $text);
+                $text = str_replace('{full_name}', '', $text);
+            } else {
+                $text = str_replace('{full_name}', $full_name, $text);
+            }
+            
             $text = str_replace('{token}', $user->token, $text);
             $text = str_replace('%7Btoken%7D', $user->token, $text);
             $text = str_replace('{id}', $user->id, $text);
@@ -1056,6 +1090,8 @@ class Newsletter extends NewsletterModule {
 
     function set_user_status($id_or_email, $status) {
         global $wpdb;
+        
+        $this->logger->debug('Status change to ' . $status . ' of subscriber ' . $id_or_email . ' from ' . $_SERVER['REQUEST_URI']);
 
         $id_or_email = strtolower(trim($id_or_email));
         if (is_numeric($id_or_email)) {
@@ -1090,9 +1126,9 @@ if (is_file(WP_CONTENT_DIR . '/extensions/newsletter/feed/feed.php')) {
     }
 }
 
-if (is_file(WP_CONTENT_DIR . '/extensions/newsletter/updates/updates.php')) {
-    require_once WP_CONTENT_DIR . '/extensions/newsletter/updates/updates.php';
-}
+//if (is_file(WP_CONTENT_DIR . '/extensions/newsletter/updates/updates.php')) {
+//    require_once WP_CONTENT_DIR . '/extensions/newsletter/updates/updates.php';
+//}
 
 if (is_file(WP_CONTENT_DIR . '/extensions/newsletter/followup/followup.php')) {
     require_once WP_CONTENT_DIR . '/extensions/newsletter/followup/followup.php';

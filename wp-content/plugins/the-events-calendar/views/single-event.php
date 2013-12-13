@@ -20,8 +20,7 @@ $event_id = get_the_ID();
 
 <div id="tribe-events-content" class="tribe-events-single">
 
-	<p class="tribe-events-back">
-		<a href="../../events/"> <?php _e( '&laquo; All Events', 'tribe-events-calendar' ) ?></a></p>
+	<p class="tribe-events-back"><a href="<?php echo tribe_get_events_link() ?>"> <?php _e( '&laquo; All Events', 'tribe-events-calendar' ) ?></a></p>
 
 	<!-- Notices -->
 	<?php tribe_events_the_notices() ?>
@@ -66,11 +65,6 @@ $event_id = get_the_ID();
 			</div><!-- .hentry .vevent -->
 		<?php if( get_post_type() == TribeEvents::POSTTYPE && tribe_get_option( 'showComments','no' ) == 'yes' ) { comments_template(); } ?>
 	<?php endwhile; ?>
-
-
-<?php
-print do_shortcode('[contact-form-7 id="1034" title="Event Signup"]');
-?>
 
 	<!-- Event footer -->
     <div id="tribe-events-footer">
