@@ -39,7 +39,7 @@ function send_newsletter(){
 	var filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
 
 	if(email !='' && filter.test(email)){
-	var url = "http://rou-lindner-school.landingpages.tv/send-email/?email="+email;
+	var url = "http://lindnerstudent.com/send-email/?email="+email;
 		document.getElementById('span_btnlistserv').style.display='block';
 	if (window.XMLHttpRequest)
 	  {// code for IE7+, Firefox, Chrome, Opera, Safari
@@ -72,7 +72,7 @@ function send_pre_newsletter(){
 	var filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
 
 	if(email !='' && filter.test(email)){
-	var url = "http://rou-lindner-school.landingpages.tv/send-email/?email="+email;
+	var url = "http://lindnerstudent.com/send-email/?email="+email;
 		document.getElementById('span_pre_news').style.display='block';
 	if (window.XMLHttpRequest)
 	  {// code for IE7+, Firefox, Chrome, Opera, Safari
@@ -106,7 +106,7 @@ function send_sign_newsletter(){
 	var filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
 
 	if(email !='' && filter.test(email)){
-	var url = "http://rou-lindner-school.landingpages.tv/send-email/?email="+email;
+	var url = "http://lindnerstudent.com/send-email/?email="+email;
 		document.getElementById('span_sign_news').style.display='block';
 	if (window.XMLHttpRequest)
 	  {// code for IE7+, Firefox, Chrome, Opera, Safari
@@ -145,6 +145,6 @@ function showNewsletter(val) {
 
 function show_organization(val){
 	if(val){
-		location.href="http://rou-lindner-school.landingpages.tv/category/organization-lists/"+val;
+		location.href="http://lindnerstudent.com/category/organization-lists/"+val;
 	}
 }
