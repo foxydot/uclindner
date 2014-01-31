@@ -5,6 +5,8 @@
 add_image_size('post-thumb', 225, 160, TRUE);
 add_image_size( 'post-image', 540, 150, TRUE ); //image to float at the top of the post. Reversed Out does these a lot.
 add_image_size('homepage-slider', 640,456,true);
+add_image_size('homepage-footer',278,137, TRUE);
+add_image_size('newsletter-thumbnail-size',136,91,false);
 
 /**
  * Manipulate the featured image

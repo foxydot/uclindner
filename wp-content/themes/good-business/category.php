@@ -82,7 +82,10 @@ get_header(); ?>
 				'order'          => 'DESC',
 				'posts_per_page' => 2
 			);
-			
+			if($parent == 50){
+			    $data = get_page_by_path('/lcb-student-organizations/'.$slug);
+                print '<section class="blogOutr">'.nl2br($data->post_content).'</section>';
+			}
 			if($category_id == 12) {
 				print '<p style="margin-left:35px;margin-top: 10px;">
 							<a class="twitter-btn" href="https://twitter.com/lcbsat" target="_blank" title="Follow Us on Twitter">Follow Us on Twitter</a>
@@ -121,27 +124,23 @@ get_header(); ?>
 				$data = get_page(136);
 				///print "<pre>";
 				//print_r($data);
+                print '<section class="blogOutr">';
 				print nl2br($data->post_content);
+                print '</section>';
 					
 			}
 			if($category_id == 17) {
 				$data = get_page(1049);
 				///print "<pre>";
 				//print_r($data);
-				print nl2br($data->post_content);
-					
+                print '<section class="blogOutr">';
+                print nl2br($data->post_content);
+				print '</section>';
 			}
 			if($category_id == 88) {
 				$data = get_page(134);
 				print '<section class="blogOutr">'
-				.nl2br($data->post_content)
-				.do_shortcode('[nggallery id=41]')
-				.do_shortcode('[nggallery id=35]')
-				.do_shortcode('[nggallery id=36]')
-				.do_shortcode('[nggallery id=37]')
-				.do_shortcode('[nggallery id=38]')
-				.do_shortcode('[nggallery id=39]')
-				.do_shortcode('[nggallery id=40]').'</section>';
+				.nl2br($data->post_content).'</section>';
 			}
 						
 			print '<div id="page_data">';
@@ -191,8 +190,19 @@ get_header(); ?>
 				print do_shortcode('[nggallery id=25]');
 				print '</div>';
 			}
-			?>
-			<?php
+			
+			
+			if($category_id == 88) {
+                print '<section class="blogOutr">'
+                .do_shortcode('[nggallery id=41]')
+                .do_shortcode('[nggallery id=35]')
+                .do_shortcode('[nggallery id=36]')
+                .do_shortcode('[nggallery id=37]')
+                .do_shortcode('[nggallery id=38]')
+                .do_shortcode('[nggallery id=39]')
+                .do_shortcode('[nggallery id=40]').'</section>';
+            }
+			
 			if($category_id == 49) {
 				print '<div style="float:left;margin-left:30px;">';
 				print do_shortcode('[nggallery id=30]');

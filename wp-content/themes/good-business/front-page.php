@@ -27,7 +27,8 @@ get_header(); ?>
                         <img src="<?php echo $img[0]; ?>" alt="banner">
                         <div class="transOutr">
                         <h2><?php echo $postcontent->post_title; ?></h2>
-                          <?php echo substr($postcontent->post_content,0,200).'...'; ?>
+                          <?php //echo substr($postcontent->post_content,0,200).'...'; ?>
+                          <?php echo msd_trim_content($postcontent->post_content); ?>
                           <br> <br>
                             <div class="learnMore">
                                 <a title="Learn More" href="<?php echo $postcontent->post_name; ?>">Learn More</a>
@@ -61,7 +62,7 @@ get_header(); ?>
              <!--
              <img src="<?php bloginfo('template_url'); ?>/images/generate_img.jpg" width="91" height="136" alt="Generate powerful value perception"> 
                 -->
-                <?php echo get_the_post_thumbnail( $array_content2[0]->ID, array(91,136));?>
+                <?php echo get_the_post_thumbnail( $array_content2[0]->ID, 'newsletter-thumbnail-size');?>
                  <span class="title">by <?php print $author;?>    <?php print date('M d Y', strtotime($array_content2[0]->post_date));?></span>
 
                 <div><h3><?php print $array_content2[0]->post_title;?></h3></div>
@@ -114,9 +115,9 @@ get_header(); ?>
 
             <li>        
             <div class="col">
-            <?php $firstcol_img = wp_get_attachment_url(  get_post_thumbnail_id( $StudentSpotlights[0]->ID ) ); ?>
+            <?php $firstcol_img = get_the_post_thumbnail( $StudentSpotlights[0]->ID, 'homepage-footer',array("alt"=>"student spotlight")); ?>
               <div style="height:137px;overflow:hidden;">
-              <img src="<?php echo $firstcol_img; ?>" width="278"   alt="student spotlight">
+              <?php echo $firstcol_img; ?>
               </div>
               <span><?php print $cat_name;?></span>  
               <div class="upcomingDetails">
@@ -154,9 +155,9 @@ get_header(); ?>
             <ul class="slides2">
             <li>
             <div class="col">
-            <?php $secondcol_img = wp_get_attachment_url(  get_post_thumbnail_id( $OrganizationSpotlight[0]->ID ) ); ?>
+              <?php $secondcol_img = get_the_post_thumbnail( $OrganizationSpotlight[0]->ID, 'homepage-footer',array("alt"=>"organization spotlight")); ?>
               <div style="height:137px;overflow:hidden;">
-              <img src="<?php echo $secondcol_img; ?>" width="278" alt="student spotlight">
+              <?php echo $secondcol_img; ?>
               </div>
               <span><?php echo $cat_name; ?></span>  
               <div class="upcomingDetails">
@@ -203,9 +204,9 @@ get_header(); ?>
 
             <li>
             <div class="col">
-            <?php $secondcol_img = wp_get_attachment_url(  get_post_thumbnail_id( $AlumniSpotlights[0]->ID ) ); ?>
+              <?php $thirdcol_img = get_the_post_thumbnail( $AlumniSpotlights[0]->ID, 'homepage-footer',array("alt"=>"alumni spotlight")); ?>
                <div style="height:137px;overflow:hidden;">
-              <img src="<?php echo $secondcol_img; ?>" width="278"  alt="student spotlight">
+              <?php echo $thirdcol_img; ?>
               </div>
               <span><?php echo $cat_name; ?></span>  
               <div class="upcomingDetails">
