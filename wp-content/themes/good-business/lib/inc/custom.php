@@ -114,9 +114,10 @@ function msdlab_add_cats_to_events( $post_type, $args ) {
 
 function msdlab_tribe_events_filter(){
     $events_cats = get_terms('tribe_events_cat');
+    $options[] = '<option value="#">Select on organization to filter</option>';
     foreach($events_cats AS $ec){
         $options[] = '<option value="'.$ec->slug.'">'.$ec->name.'</option>';
     }
-    print '<select id="event_filter" style="position:absolute;right:0;top:0;">'.implode("\n",$options).'<select>';
+    print '<select id="event_filter" style="position:absolute;right:0;top:0;background: none repeat scroll 0 0 #FFFFFF; font-size: 14px; height: 31px; margin-right: 10px; margin-top: 7px; width: 242px; font-family: open_sansregular; padding-top:4px;border:1px solid #B6B6B6;">'.implode("\n",$options).'<select>';
 }
 add_action('tribe_events_after_the_title','msdlab_tribe_events_filter');
