@@ -608,7 +608,7 @@ if ( !class_exists( "pluginbuddy_zbzipexec" ) ) {
 					// Make sure it is clean of leading/trailing whitespace
 					$path = trim( array_shift( $candidate_paths ) );
 					
-					pb_backupbuddy::status( 'details', __( 'Trying executable path for zip:','it-l10n-backupbuddy' ) . ' `' . $path . '`.' );
+					pb_backupbuddy::status( 'details', __( 'Trying executable path for zip exec:','it-l10n-backupbuddy' ) . ' `' . $path . '`.' );
 
 					$test_file = $tempdir . 'temp_test_' . uniqid() . '.zip';
 					

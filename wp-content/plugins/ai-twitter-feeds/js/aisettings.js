@@ -1,3 +1,3 @@
-jQuery(document).ready(function($){
-    $('.ai-color-field').wpColorPicker();
+jQuery(document).ready(function($){
+    $('.ai-color-field').wpColorPicker();
 });

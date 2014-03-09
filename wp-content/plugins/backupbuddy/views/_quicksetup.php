@@ -285,7 +285,7 @@ if ( !current_user_can( 'activate_plugins' ) ) {
 
 
 .setup {
-	margin: 40px 0 0 0;
+	margin: 30px 0 0 0;
 }
 input[type="text"],
 input[type="email"],
@@ -478,7 +478,7 @@ select {
 	float: left;
 	outline: none;
 	padding: 20px 30px;
-	margin: 30px 0 30px 0;
+	margin: 0px 0 30px 0;
 	text-align: center;
 	background: #f95050;
 	border: none;
@@ -503,6 +503,20 @@ select {
 	top: 3px;
 	padding: 17px 30px 20px 30px;
 }
+
+.skipsetup button {
+	background: #C3C3C3;
+	border-bottom: 4px solid #999999;
+	margin-left: 15px;
+}
+.skipsetup button:hover {
+	background: #d3d3d3;
+}
+.skipsetup button:active {
+	background: #d3d3d3;
+	border-bottom: 1px solid #999999;
+}
+
 /*wp style button
 
 .save button {
@@ -616,7 +630,17 @@ select {
 					data = jQuery.trim( data );
 					
 					if ( data == 'Success.' ) {
-						window.location.href = '<?php echo admin_url( 'admin.php' ); ?>?page=pb_backupbuddy_backup&backupbuddy_backup=full&quickstart_wizard=true';
+						<?php
+						if ( is_network_admin() ) {
+							?>
+							window.location.href = '<?php echo network_admin_url( 'admin.php' ); ?>?page=pb_backupbuddy_backup&backupbuddy_backup=full&quickstart_wizard=true';
+							<?php
+						} else {
+							?>
+							window.location.href = '<?php echo admin_url( 'admin.php' ); ?>?page=pb_backupbuddy_backup&backupbuddy_backup=full&quickstart_wizard=true';
+							<?php
+						}
+						?>
 						return false;
 					} else {
 						alert( "Error: \n\n" + data );
@@ -627,6 +651,23 @@ select {
 			
 			return false;
 		});
+		
+		
+		
+		jQuery( '.skipsetup button' ).click( function() {
+			var win = window.dialogArguments || opener || parent || top;
+			win.tb_remove();
+			
+			jQuery.post( '<?php echo pb_backupbuddy::ajax_url( 'quickstart_skip' ); ?>', jQuery(this).serialize(), 
+				function(data) {
+				}
+			);
+			return false;
+		});
+		
+		
+		
+		
 		
 		
 	});
@@ -659,8 +700,9 @@ select {
 </script>
 
 
-<br>
-Quickly get up and running by answering a few questions below. You may configure these and other settings at any time from the <a href="?page=pb_backupbuddy_settings">Settings</a> page.
+<p>
+	Use this optional <b>Quick Setup</b> step to get started fast. See the <a href="admin.php?page=pb_backupbuddy_settings" target="_top">Settings</a> page for all configuration options.
+</p>
 
 
 <form id="pb_backupbuddy_quickstart_form" method="post">
@@ -762,8 +804,13 @@ Quickly get up and running by answering a few questions below. You may configure
 		</div>
 		
 		<div class="save">
-			<button>Save & Make Your First Backup</button>
+			<button>Save Settings</button>
 			<span id="pb_backupbuddy_quickstart_saveloading" style="display: inline-block; display: none; margin-left: 35px;"><img src="<?php echo pb_backupbuddy::plugin_url(); ?>/images/loading_large.gif" <?php echo 'alt="', __('Loading...', 'it-l10n-backupbuddy' ),'" title="',__('Loading...', 'it-l10n-backupbuddy' ),'"';?> style="vertical-align: -3px; margin-top: 30px;" /></span>
 		</div>
 	</div>
 </form>
+<div class="save skipsetup">
+	<button>Skip Setup</button>
+</div>
+
+<br style="clear: both;">

@@ -67,7 +67,8 @@ if (!class_exists("pluginbuddy_dbreplace")) {
 				}
 			}
 			
-			return mysql_query( "UPDATE `{$table}` SET " . implode( ',', $rows_sql ) . ";" );
+			global $wpdb;
+			return $wpdb->query( "UPDATE `{$table}` SET " . implode( ',', $rows_sql ) . ";" );
 		}
 		
 		
@@ -94,28 +95,29 @@ if (!class_exists("pluginbuddy_dbreplace")) {
 				$rows = array( $rows );
 			}
 			
+			global $wpdb;
+			
 			// Prevent trying to replace data with the same data for performance.
 			$this->remove_matching_array_elements( $olds, $news );
-			$key_result = mysql_query( "show keys from {$table} WHERE Key_name='PRIMARY';" );
-			if ( $key_result === false ) {
+			$key_results = $wpdb->get_results( "show keys from {$table} WHERE Key_name='PRIMARY';", ARRAY_A );
+			if ( $key_results === false ) {
 				pb_backupbuddy::status( 'details', 'Table `' . $table . '` does not exist; skipping migration of this table.' );
 				return;
 			}
 			
 			// No primary key found; unsafe to edit this table. @since 2.2.32.
-			if ( mysql_num_rows( $key_result ) == 0 ) {
+			if ( count( $key_results ) == 0 ) {
 				pb_backupbuddy::status( 'message', 'Error #9029: Table `'.  $table .'` does not contain a primary key; BackupBuddy cannot safely modify the contents of this table. Skipping migration of this table. (serialized()).' );
 				return;
 			}
 			
-			$key_result = mysql_fetch_array( $key_result );
-			$primary_key = $key_result['Column_name'];
+			$primary_key = $key_results[0]['Column_name'];
 			unset( $key_result );
 			
-			$result = mysql_query( "SELECT `" . implode( '`,`', $rows ) . "`,`{$primary_key}` FROM `{$table}`");
+			$rows = $wpdb->get_results( "SELECT `" . implode( '`,`', $rows ) . "`,`{$primary_key}` FROM `{$table}`" );
 			
 			$updated = false;
-			while ( $row = mysql_fetch_array( $result, MYSQL_ASSOC ) ) {
+			foreach( $rows as $row ) {
 				$needs_update = false;
 				$sql_update = array();
 				
@@ -132,9 +134,10 @@ if (!class_exists("pluginbuddy_dbreplace")) {
 				
 				if ( $needs_update === true ) {
 					$updated = true;
-					mysql_query( "UPDATE `{$table}` SET " . implode( ',', $sql_update ) . " WHERE `{$primary_key}` = '{$primary_key_value}' LIMIT 1" );
+					$wpdb->query( "UPDATE `{$table}` SET " . implode( ',', $sql_update ) . " WHERE `{$primary_key}` = '{$primary_key_value}' LIMIT 1" );
 				}
 			}
+			unset( $rows );
 			
 			if ( $updated === true ) {
 				pb_backupbuddy::status( 'details', 'Updated serialized data in ' . $table . '.' );
@@ -230,7 +233,9 @@ if (!class_exists("pluginbuddy_dbreplace")) {
 			$count_items_checked = 0;
 			$count_items_changed = 0;
 			
-			$fields_list = mysql_query( "DESCRIBE `" . $table . "`" );
+			global $wpdb;
+			
+			$fields = $wpdb->get_results( "DESCRIBE `" . $table . "`", ARRAY_A );
 			$index_fields = '';  // Reset fields for each table.
 			$column_name = '';
 			$table_index = '';
@@ -238,9 +243,9 @@ if (!class_exists("pluginbuddy_dbreplace")) {
 			
 			$found_primary_key = false;
 			
-			while ( $field_rows = mysql_fetch_array( $fields_list ) ) {
-				$column_name[$i++] = $field_rows['Field'];
-				if ( $field_rows['Key'] == 'PRI' ) {
+			foreach( $fields as $field ) {
+				$column_name[$i++] = $field['Field'];
+				if ( $field['Key'] == 'PRI' ) {
 					$table_index[$i] = true;
 					$found_primary_key = true;
 				}
@@ -252,13 +257,13 @@ if (!class_exists("pluginbuddy_dbreplace")) {
 				return false;
 			}
 			
-			$data = mysql_query( "SELECT * FROM `" . $table . "`" );
-			if (!$data) {
+			$data = $wpdb->get_results( "SELECT * FROM `" . $table . "`", ARRAY_A );
+			if ( false === $data ) {
 				pb_backupbuddy::status( 'error', 'ERROR #44545343 ... SQL ERROR: ' . mysql_error() );
 			}
 			
 			$row_loop = 0;
-			while ( $row = mysql_fetch_array( $data ) ) {
+			foreach( $data as $row ) {
 				$need_to_update = false;
 				$UPDATE_SQL = 'UPDATE `' . $table . '` SET ';
 				$WHERE_SQL = ' WHERE ';
@@ -291,8 +296,8 @@ if (!class_exists("pluginbuddy_dbreplace")) {
 				if ( $need_to_update ) {
 					$WHERE_SQL = substr( $WHERE_SQL , 0, -4 ); // Strip off the excess AND - the easiest way to code this without extra flags, etc.
 					$UPDATE_SQL = $UPDATE_SQL . $WHERE_SQL;
-					$result = mysql_query( $UPDATE_SQL );
-					if ( !$result ) {
+					$result = $wpdb->query( $UPDATE_SQL );
+					if ( false === $result ) {
 						pb_backupbuddy::status( 'error', 'ERROR: mysql error updating db: ' . mysql_error() . '. SQL Query: ' . htmlentities( $UPDATE_SQL ) );
 					} 
 				}

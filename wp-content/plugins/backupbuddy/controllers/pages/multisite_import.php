@@ -2,7 +2,7 @@
 
 pb_backupbuddy::$ui->title( 'Multisite Import Site (EXPERIMENTAL)' . ' ' . pb_backupbuddy::video( '4RmC5nLmabE', __('Multisite import', 'it-l10n-backupbuddy' ), false ) );
 
-pb_backupbuddy::$classes['core']->versions_confirm();
+backupbuddy_core::versions_confirm();
 
 pb_backupbuddy::set_status_serial( 'ms_import' );
 

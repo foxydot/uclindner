@@ -31,5 +31,11 @@ jQuery(document).ready(function($) {
 			return '<li class="separator">|</li>';
 		}
 	});
-	
+    jQuery('#events_filter').change(function(){
+         alert( "Handler for .change() called." );
+        var filter = 'tribe-events-category-'+$(this).val();
+        console.log(filter);
+        $('.type-tribe_events').show();  
+        $('.type-tribe_events:not(.' + filter + ')').hide();  
+    });
 });

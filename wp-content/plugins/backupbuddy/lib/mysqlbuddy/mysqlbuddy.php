@@ -189,19 +189,14 @@ class pb_backupbuddy_mysqlbuddy {
 		$failed = true;
 		$mysql_directories = $this->_default_mysql_directories;
 		
-		$result = mysql_query( "SHOW VARIABLES LIKE 'basedir'" );
-		if ( $result !== false ) {
-			$row = mysql_fetch_row( $result );
-			if ( $row !== false ) {
-				
-				$basedir = rtrim( $row[1], '/\\' ); // Trim trailing slashes.
-				$mysqldir = $basedir . '/bin/';
-				array_unshift( $mysql_directories, $mysqldir ); // Prepends the just found directory to the beginning of the list.
-				pb_backupbuddy::status( 'details', 'mysqlbuddy: Mysql reported its directory. Reported: `' . $row[1] . '`; Adding binary location to beginning of mysql directory list: `' . $mysqldir . '`' );
-				$failed = false;
-				
-			}
-			mysql_free_result( $result ); // Free memory.
+		global $wpdb;
+		$basedir = $wpdb->get_results( "SHOW VARIABLES LIKE 'basedir'", ARRAY_N );
+		if ( $basedir !== false ) {
+			$basedirtrim = rtrim( $basedir[0][1], '/\\' ); // Trim trailing slashes.
+			$mysqldir = $basedirtrim . '/bin/';
+			array_unshift( $mysql_directories, $mysqldir ); // Prepends the just found directory to the beginning of the list.
+			pb_backupbuddy::status( 'details', 'mysqlbuddy: Mysql reported its directory. Reported: `' . $basedir[0][1] . '`; Adding binary location to beginning of mysql directory list: `' . $mysqldir . '`' );
+			$failed = false;
 		}
 		
 		if ( $failed === true ) {
@@ -229,7 +224,6 @@ class pb_backupbuddy_mysqlbuddy {
 	 *	@return
 	 */
 	public function dump( $output_directory, $tables = array() ) { //, $base_dump_mode, $additional_includes = array(), $additional_excludes = array() ) {
-		$return = false;
 		
 		$output_directory = rtrim( $output_directory, '/' ) . '/'; // Make sure we have trailing slash.
 		pb_backupbuddy::status( 'action', 'start_database' );
@@ -347,6 +341,9 @@ class pb_backupbuddy_mysqlbuddy {
 		// TODO: In the future handle fallback better by possibly breaking the command up if possible rather than strict fallback to PHP dumping.
 		$command_length = strlen( $command );
 		pb_backupbuddy::status( 'details', 'mysqlbuddy: Command length: `' . $command_length . '`.' );
+		if ( '1' == pb_backupbuddy::$options['ignore_command_length_check'] ) {
+			pb_backupbuddy::status( 'details', 'mysqlbuddy: Advanced option to ignore command line length check results in enabled. Any negative results will be ignored (if applicable).' );
+		}
 		if ( $command_length > self::COMMAND_LINE_LENGTH_CHECK_THRESHOLD ) { // Arbitrary length. Seems standard max lengths are > 200000 on Linux. ~8600 on Windows?
 			pb_backupbuddy::status( 'details', 'mysqlbuddy: Command line length of `' . $command_length . '` (bytes) is large enough ( >' . self::COMMAND_LINE_LENGTH_CHECK_THRESHOLD . ' ) to verify compatibility. Checking maximum allowed command line length for this sytem.' );
 			list( $exec_output, $exec_exit_code ) = $this->_commandbuddy->execute( 'echo $(( $(getconf ARG_MAX) - $(env | wc -c) ))' ); // Value will be a number. This is the maximum byte size of the command line.
@@ -354,8 +351,15 @@ class pb_backupbuddy_mysqlbuddy {
 			if ( is_array( $exec_output ) && is_numeric( $exec_output[0] ) ) {
 				pb_backupbuddy::status( 'details', 'mysqlbuddy: Detected maximum command line length for this system: `' . $exec_output[0] . '`.' );
 				if ( $command_length > ( $exec_output[0] - 100 ) ) { // Check if we exceed maximum length. Subtract 100 to make room for path definition.
-					pb_backupbuddy::status( 'details', 'mysqlbuddy: This system\'s maximum command line length of `' . $exec_output[0] . '` is shorter than command length of `' . $command_length . '`. Falling back into compatibility mode to insure database dump integrity.' );
-					return false;
+					if ( '1' == pb_backupbuddy::$options['ignore_command_length_check'] ) {
+						pb_backupbuddy::status( 'details', 'mysqlbuddy: This system\'s maximum command line length of `' . $exec_output[0] . '` is shorter than command length of `' . $command_length . '`. However, the option to ignore command line length check is enabled based on settings so continuing anyways.' );
+					} else {
+						if ( $exec_output[0] < 0 ) {
+							pb_backupbuddy::status( 'warning', 'mysqlbuddy: This system reported a negative number for the maximum command line length. This means that BackupBuddy cannot safely detect this system\'s limit.  This check can be overriden by enabling the "Skip command line length check" advanced option on the Settings page in BackupBuddy as a workaround. get_conf ARG_MAX likely failed.' );
+						}
+						pb_backupbuddy::status( 'details', 'mysqlbuddy: This system\'s maximum command line length of `' . $exec_output[0] . '` is shorter than command length of `' . $command_length . '`. Falling back into compatibility mode to insure database dump integrity.' );
+						return false;
+					}
 				} else {
 					pb_backupbuddy::status( 'details', 'mysqlbuddy: This system\'s maximum command line length of `' . $exec_output[0] . '` is longer than command length of `' . $command_length . '`. Continuing.' );
 				}
@@ -446,6 +450,8 @@ class pb_backupbuddy_mysqlbuddy {
 	 */
 	private function _dump_php( $output_directory, $tables ) { //, $base_dump_mode, $additional_excludes ) {
 		
+		$max_rows_per_select = 3000;
+		
 		$output_file = $output_directory . 'db_1.sql';
 		pb_backupbuddy::status( 'details', 'mysqlbuddy: Preparing to run PHP mysqldump compatibility mode.' );
 		
@@ -464,8 +470,8 @@ class pb_backupbuddy_mysqlbuddy {
 		
 		// Connect if not connected for importbuddy.
 		if ( !mysql_ping( $wpdb->dbh ) ) {
-			mysql_connect( $this->_database_host, $this->_database_user, $this->_database_pass );
-			mysql_select_db( $this->_database_name );
+			$wpdb->dbh = mysql_connect( $this->_database_host, $this->_database_user, $this->_database_pass );
+			mysql_select_db( $this->_database_name, $wpdb->dbh );
 		}
 		
 		$_count = 0;
@@ -476,77 +482,91 @@ class pb_backupbuddy_mysqlbuddy {
 		// Iterate through all the tables to backup.
 		// TODO: Future ability to break up DB exporting to multiple page loads if needed. Really still need this now that we have command line dump?
 		foreach( $tables as $table_key => $table ) {
-			$create_table = mysql_query("SHOW CREATE TABLE `{$table}`");
+			pb_backupbuddy::status( 'details', 'Starting to dump database table `' . $table . '`. Max rows per select: ' . $max_rows_per_select . '.' );
+			$create_table = $wpdb->get_results( "SHOW CREATE TABLE `{$table}`", ARRAY_N );
 			
 			if ( $create_table === false ) {
 				pb_backupbuddy::status( 'error', 'Unable to access and dump database table `' . $table . '`. Table may not exist. Skipping backup of this table.' );
-				//pb_backupbuddy::$classes['core']->mail_error( 'Error #4537384: Unable to access and dump database table `' . $table . '`. Table may not exist. Skipping backup of this table.' );
+				//backupbuddy_core::mail_error( 'Error #4537384: Unable to access and dump database table `' . $table . '`. Table may not exist. Skipping backup of this table.' );
 				continue; // Skip this iteration as accessing this table failed.
 			}
 			
 			// Table creation text.
-			$create_table_array = mysql_fetch_array( $create_table );
-			mysql_free_result( $create_table ); // Free memory.
+			$create_table_array = $create_table[0];
+			unset( $create_table );
 			$insert_sql .= str_replace( "\n", '', $create_table_array[1] ) . ";\n"; // Remove internal linebreaks; only put one at end.
 			unset( $create_table_array );
 			
 			// Disable keys for this table.
 			$insert_sql .= "/*!40000 ALTER TABLE `{$table}` DISABLE KEYS */;\n";
 			
-			// Row creation text for all rows within this table.
-			$table_query = mysql_query("SELECT * FROM `$table`") or pb_backupbuddy::status( 'error', 'Error #9001: Unable to read database table `' . $table . '`. Your backup will not include data from this table (you may ignore this warning if you do not need this specific data). This is due to the following error: ' . mysql_error() );
-			if ( $table_query === false ) {
-				pb_backupbuddy::status( 'error', 'ERROR #85449745. Unable to retrieve data from table `' . $table . '`. This table may be corrupt (try repairing the database) or too large to hold in memory (increase mysql and/or PHP memory). Check your PHP error log for further errors which may provide further information. Not continuing database dump to insure backup integrity.' );
-				return false;
-			}
-			
-			$num_fields = mysql_num_fields($table_query);
-			while ( $fetch_row = mysql_fetch_array( $table_query ) ) {
-				$insert_sql .= "INSERT INTO `$table` VALUES(";
-				for ( $n=1; $n<=$num_fields; $n++ ) {
-					$m = $n - 1;
-									
-					if ( $fetch_row[$m] === NULL ) {
-						$insert_sql .= "NULL, ";
-					} else {
-						$insert_sql .= "'" . mysql_real_escape_string( $fetch_row[$m] ) . "', ";
+			$rows_remain = true;
+			$rows_start = 0;
+			while ( true === $rows_remain ) {
+				// Row creation text for all rows within this table.
+				$query = "SELECT * FROM `$table` LIMIT " . $rows_start . ',' . $max_rows_per_select;
+				//pb_backupbuddy::status( 'details', 'Query: `' . $query . '`' );
+				$table_query = $wpdb->get_results( $query, ARRAY_N );
+				$rows_start += $max_rows_per_select; // Next loop we will begin at this offset.
+				if ( $table_query === false ) {
+					pb_backupbuddy::status( 'error', 'ERROR #85449745. Unable to retrieve data from table `' . $table . '`. This table may be corrupt (try repairing the database) or too large to hold in memory (increase mysql and/or PHP memory). Check your PHP error log for further errors which may provide further information. Not continuing database dump to insure backup integrity.' );
+					return false;
+				}
+				if ( 0 == count( $table_query ) ) {
+					$rows_remain = false;
+					break;
+				}
+				
+				$columns = $wpdb->get_col_info();
+				$num_fields = count( $columns );
+				foreach( $table_query as $fetch_row ) {
+					$insert_sql .= "INSERT INTO `$table` VALUES(";
+					for ( $n=1; $n<=$num_fields; $n++ ) {
+						$m = $n - 1;
+										
+						if ( $fetch_row[$m] === NULL ) {
+							$insert_sql .= "NULL, ";
+						} else {
+							$insert_sql .= "'" . mysql_real_escape_string( $fetch_row[$m] ) . "', ";
+						}
 					}
-				}
-				$insert_sql = substr( $insert_sql, 0, -2 );
-				$insert_sql .= ");\n";
+					$insert_sql = substr( $insert_sql, 0, -2 );
+					$insert_sql .= ");\n";
+					
+					fwrite( $file_handle, $insert_sql );
+					$insert_sql = '';
+					
+					// Help keep HTTP alive.
+					$_count++;
+					if ($_count >= 400) {
+						echo ' ';
+						pb_backupbuddy::flush();;
+						$_count = 0;
+					}
+				} // end while $rows_remain is true.
 				
-				fwrite( $file_handle, $insert_sql );
-				$insert_sql = '';
-				
-				// Help keep HTTP alive.
-				$_count++;
-				if ($_count >= 400) {
-					echo ' ';
-					pb_backupbuddy::flush();;
-					$_count = 0;
+				// testing: mysql_close( $wpdb->dbh );
+				// Verify database is still connected and working properly. Sometimes mysql runs out of memory and dies in the above foreach.
+				// No point in reconnecting as we can NOT trust that our dump was succesful anymore (it most likely was not).
+				if ( @mysql_ping( $wpdb->dbh ) ) { // Still connected to database.
+					
+				} else { // Database not connected.
+					pb_backupbuddy::status( 'error', __( 'ERROR #9026: The mySQL server went away unexpectedly during database dump of table `' . $table . '`. This is almost always caused by mySQL running out of memory. The backup integrity can no longer be guaranteed so the backup has been halted.' ) . ' ' . __( 'Last table dumped before database server went away: ' ) . '`' . $table . '`.' );
+					return false;
 				}
+				
 			} // End foreach $tables.
 			
 			// Re-enable keys for this table.
 			$insert_sql .= "/*!40000 ALTER TABLE `{$table}` ENABLE KEYS */;\n";
 			
-			// testing: mysql_close( $wpdb->dbh );
-			// Verify database is still connected and working properly. Sometimes mysql runs out of memory and dies in the above foreach.
-			// No point in reconnecting as we can NOT trust that our dump was succesful anymore (it most likely was not).
-			if ( @mysql_ping( $wpdb->dbh ) ) { // Still connected to database.
-				mysql_free_result( $table_query ); // Free memory.
-			} else { // Database not connected.
-				pb_backupbuddy::status( 'error', __( 'ERROR #9026: The mySQL server went away unexpectedly during database dump. This is almost always caused by mySQL running out of memory. The backup integrity can no longer be guaranteed so the backup has been halted.' ) . ' ' . __( 'Last table dumped before database server went away: ' ) . '`' . $table . '`.' );
-				return false;
-			}
-			
 			// Help keep HTTP alive.
 			echo ' ';
-			pb_backupbuddy::status( 'details', 'Dumped database table `' . $table . '`.' );
+			pb_backupbuddy::status( 'details', 'Finished dumping database table `' . $table . '`.' );
 			pb_backupbuddy::flush();;
 			
 			//unset( $tables[$table_key] );
-		}
+		} // end foreach table.
 		
 		fclose( $file_handle );
 		unset( $file_handle );
@@ -599,15 +619,17 @@ class pb_backupbuddy_mysqlbuddy {
 			pb_backupbuddy::status( 'message', 'Restoring database dump. This may take a moment...' );
 		}
 		
+		global $wpdb;
+		
 		// Check whether or not tables already exist that might collide.
 		if ( $ignore_existing === false ) {
 			if ( $query_start == 0 ) { // Check number of tables already existing with this prefix. Skips this check on substeps of DB import.
-				$result = mysql_query( "SHOW TABLES LIKE '" . mysql_real_escape_string( str_replace( '_', '\_', $this->_database_prefix ) ) . "%'" );
-				if ( mysql_num_rows( $result ) > 0 ) {
-					pb_backupbuddy::status( 'error', 'Error #9014: Database import halted to prevent overwriting existing WordPress data.', 'The database already contains a WordPress installation with this prefix (' . mysql_num_rows( $result ) . ' tables). Restore has been stopped to prevent overwriting existing data. *** Please go back and enter a new database name and/or prefix OR select the option to wipe the database prior to import from the advanced settings on the first import step. ***' );
+				$rows = $wpdb->get_results( "SELECT table_name FROM information_schema.tables WHERE table_name LIKE '" . mysql_real_escape_string( str_replace( '_', '\_', $this->_database_prefix ) ) . "%' AND table_schema = DATABASE()", ARRAY_A );
+				if ( count( $rows ) > 0 ) {
+					pb_backupbuddy::status( 'error', 'Error #9014: Database import halted to prevent overwriting existing WordPress data.', 'The database already contains a WordPress installation with this prefix (' . count( $rows ) . ' tables). Restore has been stopped to prevent overwriting existing data. *** Please go back and enter a new database name and/or prefix OR select the option to wipe the database prior to import from the advanced settings on the first import step. ***' );
 					return false;
 				}
-				unset( $result );
+				unset( $rows );
 			}
 		}
 		
@@ -663,7 +685,7 @@ class pb_backupbuddy_mysqlbuddy {
 			};
 			pb_backupbuddy::$classes['textreplacebuddy']->set_methods( array( 'commandline' ) ); // dont fallback into text version here.
 			
-			$regex_condition = "(INSERT INTO|CREATE TABLE|REFERENCES|CONSTRAINT|ALTER TABLE) (`?){$old_prefix}";
+			$regex_condition = "(INSERT INTO|CREATE TABLE|REFERENCES|CONSTRAINT|ALTER TABLE) (`?){$old_prefix}(`?)";
 			pb_backupbuddy::$classes['textreplacebuddy']->string_replace( $sql_file, $old_prefix, $this->_database_prefix, $regex_condition );
 			
 			$sql_file = $sql_file . '.tmp'; // New SQL file created by textreplacebuddy.
@@ -854,28 +876,24 @@ class pb_backupbuddy_mysqlbuddy {
 			$query = preg_replace( "/^($query_operators)(\s+`?)$old_prefix/i", "\${1}\${2}$new_prefix", $query ); // 4-29-11
 		}
 		
-		// Run the query
-		// Disabled to prevent from running on EVERY line. Now just running before this. mysql_query("SET NAMES 'utf8'"); // Force UTF8
-		$result = mysql_query( $query );
+		// Output which table we are able to create to help get an idea where we are in the import.
+		if ( 1 == preg_match( "/CREATE TABLE `?(\w+)`?/i", $query, $matches ) ) {
+			pb_backupbuddy::status( 'details', 'Creating table `' . $matches[1] . '`.' );
+		}
 		
-		if ( false === $result ) {
+		global $wpdb;
+		
+		// Run the query
+		$result = $wpdb->query( $query );
+		
+		if ( false === $rows ) {
 			if ( $ignore_existing !== true ) {
-				$mysql_error = mysql_error();
-				//if ( count( self::$_limit_9010_count < self::LIMIT_9010_LOG_MAX ) ) { // Havent maxed out 9010 errors yet.
+				$mysql_error = mysql_error( $wpdb->dbh );
 				pb_backupbuddy::status( 'error', 'Error #9010: Unable to import SQL query: ' . $mysql_error );
-				//	self::$_limit_9010_count++;
-				/*} elseif ( count( self::$_limit_9010_count == self::LIMIT_9010_LOG_MAX )  ) {
-					pb_backupbuddy::status( 'error', 'Error #9010: Unable to import SQL query: ' . $mysql_error );
-					$overflow_log_file = ABSPATH . importbuddy . '';
-					pb_backupbuddy::status( 'error', 'WARNING: As a large amount of 9010 errors have been encountered the display of any further 9010 errors will be redirected to the overflow log located at `' . $overflow_log_file . '`. NOTE: 9010 errors indicating duplicates can often be safely ignored.' );
-				} else { // Maxed out.
-					// Save 9010 errors to overflow log.
-					$overflow_log_file = ABSPATH . importbuddy . '';
-					@file_put_contents ( $overflow_log_file, 'Error #9010: Unable to import SQL query: ' . $mysql_error, FILE_APPEND );
-				}*/
 				if ( false !== stristr( $mysql_error, 'server has gone away' ) ) { // if string denotes that mysql server has gone away bail since it will likely just flood user with errors...
 					pb_backupbuddy::status( 'error', 'Error #9010b: Halting backup process as mysql server has gone away and database data could not be imported. Typically the restore cannot continue so the process has been halted. This is usually caused by a problematic mysql server at your hosting provider, low mysql timeouts, etc. Contact your hosting company for support.' );
-					die( 'BACKUP HALTED' );
+					pb_backupbuddy::status( 'details', 'Last query attempted: `' . $query . '`.' );
+					die( 'Error #948343: FATAL ERROR - IMPORT HALTED' );
 				}
 			}
 			return false;

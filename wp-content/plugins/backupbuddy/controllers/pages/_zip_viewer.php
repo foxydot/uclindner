@@ -17,7 +17,7 @@ if ( pb_backupbuddy::_GET( 'value' ) == '' ) {
 }
 $file = str_replace( '\\', '', $file );
 $file = str_replace( '/', '', $file );
-$serial = pb_backupbuddy::$classes['core']->get_serial_from_file( $file );
+$serial = backupbuddy_core::get_serial_from_file( $file );
 
 
 pb_backupbuddy::disalert( 'restore_caution', __( 'Caution: Restored files may overwrite existing files of the same name.  Use caution when restoring, especially when restoring large numbers of files to avoid breaking the site.', 'it-l10n-backupbuddy' ) );
@@ -42,7 +42,7 @@ pb_backupbuddy::disalert( 'restore_caution', __( 'Caution: Restored files may ov
 				}
 			},
 			function(directory) {
-				if ( ( directory == '/wp-content/' ) || ( directory == '/wp-content/uploads/' ) || ( directory == '<?php echo str_replace( '\\', '/', pb_backupbuddy::$options['backup_directory'] ); ?>' ) || ( directory == '/wp-content/uploads/backupbuddy_temp/' ) ) {
+				if ( ( directory == '/wp-content/' ) || ( directory == '/wp-content/uploads/' ) || ( directory == '<?php echo str_replace( '\\', '/', backupbuddy_core::getBackupDirectory() ); ?>' ) || ( directory == '/wp-content/uploads/backupbuddy_temp/' ) ) {
 					alert( '<?php _e('You cannot exclude /wp-content/, /wp-content/uploads/, or BackupBuddy directories.  However, you may exclude subdirectories within these. BackupBuddy directories such as backupbuddy_backups are automatically excluded and cannot be added to exclusion list.', 'it-l10n-backupbuddy' );?>' );
 				} else {
 					jQuery('#pb_backupbuddy_excludes').val( directory + "\n" + jQuery('#pb_backupbuddy_excludes').val() );
@@ -125,7 +125,7 @@ pb_backupbuddy::disalert( 'restore_caution', __( 'Caution: Restored files may ov
 // Set up zipbuddy.
 if ( !isset( pb_backupbuddy::$classes['zipbuddy'] ) ) {
 	require_once( pb_backupbuddy::plugin_path() . '/lib/zipbuddy/zipbuddy.php' );
-	pb_backupbuddy::$classes['zipbuddy'] = new pluginbuddy_zipbuddy( pb_backupbuddy::$options['backup_directory'] );
+	pb_backupbuddy::$classes['zipbuddy'] = new pluginbuddy_zipbuddy( backupbuddy_core::getBackupDirectory() );
 }
 
 pb_backupbuddy::$ui->title( 'View Backup Contents' );

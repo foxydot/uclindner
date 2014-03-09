@@ -102,3 +102,21 @@ function ungobble($query){
     }
 }
 add_filter('pre_get_posts','ungobble',2);
+
+function msdlab_add_cats_to_events( $post_type, $args ) {
+    // Make sure we're only editing the post type we want
+    if ( 'tribe_events' != $post_type )
+        return;
+
+    register_taxonomy_for_object_type( 'category', $post_type );
+}
+//add_action( 'registered_post_type', 'msdlab_add_cats_to_events', 10, 2 );
+
+function msdlab_tribe_events_filter(){
+    $events_cats = get_terms('tribe_events_cat');
+    foreach($events_cats AS $ec){
+        $options[] = '<option value="'.$ec->slug.'">'.$ec->name.'</option>';
+    }
+    print '<select id="event_filter" style="position:absolute;right:0;top:0;">'.implode("\n",$options).'<select>';
+}
+add_action('tribe_events_after_the_title','msdlab_tribe_events_filter');

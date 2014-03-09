@@ -19,6 +19,13 @@ jQuery(function ($) {
 	$('#download a').mousedown(function () {
 		_gaq.push(['_trackEvent', 'download-button', 'clicked'])		
 	});
+	
+    jQuery('#event_filter').change(function(){
+        var filter = 'tribe-events-category-'+$(this).val();
+        console.log(filter);
+        $('.type-tribe_events').show();  
+        $('.type-tribe_events:not(.' + filter + ')').hide();  
+    });
 });
 
 // google analytics code

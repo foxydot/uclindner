@@ -1,0 +1,4 @@
+[28-Feb-2014 10:42:08 UTC] PHP Fatal error:  Call to undefined function plugin_basename() in /home/csheanshang/public_html/wp-content/plugins/contact-form-7/wp-contact-form-7.php on line 35
+[03-Mar-2014 02:32:37 UTC] PHP Fatal error:  Call to undefined function plugin_basename() in /home/csheanshang/public_html/wp-content/plugins/contact-form-7/wp-contact-form-7.php on line 35
+[03-Mar-2014 02:32:46 UTC] PHP Fatal error:  Call to undefined function plugin_basename() in /home/csheanshang/public_html/wp-content/plugins/contact-form-7/wp-contact-form-7.php on line 35
+[03-Mar-2014 02:33:02 UTC] PHP Fatal error:  Call to undefined function plugin_basename() in /home/csheanshang/public_html/wp-content/plugins/contact-form-7/wp-contact-form-7.php on line 35

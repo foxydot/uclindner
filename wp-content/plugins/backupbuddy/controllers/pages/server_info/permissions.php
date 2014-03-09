@@ -11,9 +11,9 @@ $directories = array(
 	ABSPATH . 'wp-content/',
 	ABSPATH . 'wp-content/uploads/',
 	ABSPATH . 'wp-includes/',
-	pb_backupbuddy::$options['backup_directory'],
-	pb_backupbuddy::$options['log_directory'],
-	pb_backupbuddy::$options['temp_directory'],
+	backupbuddy_core::getBackupDirectory(),
+	backupbuddy_core::getTempDirectory(),
+	backupbuddy_core::getLogDirectory(),
 );
 
 
