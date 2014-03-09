@@ -24,7 +24,9 @@ jQuery(function ($) {
         var filter = 'tribe-events-category-'+$(this).val();
         console.log(filter);
         $('.type-tribe_events').show();  
-        $('.type-tribe_events:not(.' + filter + ',.all)').hide();  
+        if(filter != 'tribe-events-category-all'){
+            $('.type-tribe_events:not(.' + filter + ',.tribe-events-category-all)').hide();
+        }
     });
 });
 
