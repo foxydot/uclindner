@@ -24,7 +24,7 @@ jQuery(function ($) {
         var filter = 'tribe-events-category-'+$(this).val();
         console.log(filter);
         $('.type-tribe_events').show();  
-        $('.type-tribe_events:not(.' + filter + ')').hide();  
+        $('.type-tribe_events:not(.' + filter + ',.all)').hide();  
     });
 });
 
