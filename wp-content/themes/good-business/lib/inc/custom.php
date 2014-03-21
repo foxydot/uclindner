@@ -25,7 +25,7 @@ class MSDLAB{
      $i = 0;
         while ( $the_query->have_posts() && $i<1 ) {
             $the_query->the_post();
-            $elink = '/calendar/'.get_permalink();
+            $elink = get_permalink();
             $thumb = get_the_post_thumbnail( get_the_ID() );
             $ret .= '<section class="upcomingEvent" >
                     <a href="'.$eLink.'">
