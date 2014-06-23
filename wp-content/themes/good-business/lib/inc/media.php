@@ -2,6 +2,7 @@
 /**
  * Add new image sizes
  */
+add_theme_support( 'post-thumbnails' );
 add_image_size('post-thumb', 225, 160, TRUE);
 add_image_size( 'post-image', 540, 150, TRUE ); //image to float at the top of the post. Reversed Out does these a lot.
 add_image_size('homepage-slider', 640,456,true);
