@@ -147,6 +147,7 @@ if ( !function_exists('msdlab_has_shortcode') ) {
 
 if ( ! function_exists( 'msd_trim_content' ) ) :
 function msd_trim_content($text, $length = 35) {
+    //TODO: make to use actual excerpt
     $raw_excerpt = $text;
     if ( '' == $text ) {
         $text = get_the_content('');
